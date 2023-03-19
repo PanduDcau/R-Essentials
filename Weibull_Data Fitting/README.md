@@ -1,5 +1,4 @@
 # Matlab_StatsProject
-This is my statistics project under professor Sharmishta Mitra of Indian Institute of Technology Kanpur in 2nd year summers. 
 
 ### Problem Statement 
 Draw random samples of size 10, 30 and 100 from a generalized exponential distribution and fit these to 
