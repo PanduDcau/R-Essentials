@@ -1,0 +1,531 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+dataset <- read.csv("Hotel Reservations.csv")
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+head(dataset)
+```
+```{r}
+dataset <- dataset[ , !(names(dataset) %in% c("Booking_ID"))]
+head(dataset)
+```
+
+```{r}
+label_encoder = function(vec){
+    levels = sort(unique(vec))
+    function(x){
+        match(x, levels)
+    }
+}
+
+
+for (column in colnames(dataset)){
+  if (typeof(dataset[[column]]) == 'character'){
+    #encoder = label_encoder(dataset[[column]])
+    #dataset[[column]] = encoder(dataset[[column]])
+    #saveRDS(encoder, paste(column, "encoder.RDS", sep = "_"))
+    dataset[[column]] = as.factor(dataset[[column]])
+  }
+}
+
+str(dataset)
+```
+```{r}
+tbl <- with(dataset, table(booking_status))
+
+barplot(tbl, legend = TRUE)
+
+```
+```{r}
+#library(corrplot)
+#corrplot(round(cor(dataset), 2), method="color", addCoef.col = 1,number.cex = 0.3, tl.cex = 0.3)
+```
+```{r}
+#install.packages('scales')
+library(scales)
+
+set.seed(123)
+
+smp_size <- floor(0.75 * nrow(dataset))
+
+train_ind <- sample(seq_len(nrow(dataset)), size = smp_size)
+
+
+#dataset[dataset["booking_status" == 1]] = 0
+#dataset[dataset["booking_status" == 2]] = 1
+
+#dataset$booking_status <- rescale(dataset$booking_status)
+
+train <- dataset[train_ind, ]
+test <- dataset[-train_ind, ]
+
+featue_cols <- colnames(dataset)[colnames(dataset) != "booking_status"]
+target_col <- "booking_status"
+
+#xtrain <- train[featue_cols]
+#ytrain <- train[[target_col]]
+
+xtest <- test[featue_cols]
+ytest <- test[[target_col]]
+
+train <- as.data.frame(train)
+xtest <- as.data.frame(xtest)
+ytest <- as.data.frame(ytest)
+
+head(train)
+
+```
+
+```{r}
+#install.packages('rpart')
+#install.packages('caret')
+
+#Import required library
+library(caret)
+library(rpart)
+
+classifier <- rpart(booking_status ~., train)
+
+classifier.booking_status.predicted <- predict(classifier, xtest, type='class')
+
+#print(classifier.booking_status.predicted)
+#print(test$booking_status)
+ 
+# Making the Confusion Matrix
+cm = confusionMatrix(classifier.booking_status.predicted, test$booking_status)
+
+print(cm)
+```
+
+
+
+```{r}
+#install.packages("randomForest")
+library(randomForest)
+
+classifier_RF = randomForest(x = train[featue_cols],
+                             y = train[[target_col]],
+                             ntree = 500)
+
+classifier_RF.booking_status.predicted = predict(classifier_RF, newdata = test[featue_cols])
+
+confusion_mtx = confusionMatrix(classifier_RF.booking_status.predicted, test[[target_col]])
+print(confusion_mtx)
+```
+
+
+```{r}
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+dataset <- read.csv("Hotel Reservations.csv")
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+head(dataset)
+```
+```{r}
+dataset <- dataset[ , !(names(dataset) %in% c("Booking_ID"))]
+head(dataset)
+```
+
+```{r}
+label_encoder = function(vec){
+    levels = sort(unique(vec))
+    function(x){
+        match(x, levels)
+    }
+}
+
+
+for (column in colnames(dataset)){
+  if (typeof(dataset[[column]]) == 'character'){
+    #encoder = label_encoder(dataset[[column]])
+    #dataset[[column]] = encoder(dataset[[column]])
+    #saveRDS(encoder, paste(column, "encoder.RDS", sep = "_"))
+    dataset[[column]] = as.factor(dataset[[column]])
+  }
+}
+
+str(dataset)
+```
+```{r}
+tbl <- with(dataset, table(booking_status))
+
+barplot(tbl, legend = TRUE)
+
+```
+```{r}
+#library(corrplot)
+#corrplot(round(cor(dataset), 2), method="color", addCoef.col = 1,number.cex = 0.3, tl.cex = 0.3)
+```
+```{r}
+#install.packages('scales')
+library(scales)
+
+set.seed(123)
+
+smp_size <- floor(0.75 * nrow(dataset))
+
+train_ind <- sample(seq_len(nrow(dataset)), size = smp_size)
+
+
+#dataset[dataset["booking_status" == 1]] = 0
+#dataset[dataset["booking_status" == 2]] = 1
+
+#dataset$booking_status <- rescale(dataset$booking_status)
+
+train <- dataset[train_ind, ]
+test <- dataset[-train_ind, ]
+
+featue_cols <- colnames(dataset)[colnames(dataset) != "booking_status"]
+target_col <- "booking_status"
+
+#xtrain <- train[featue_cols]
+#ytrain <- train[[target_col]]
+
+xtest <- test[featue_cols]
+ytest <- test[[target_col]]
+
+train <- as.data.frame(train)
+xtest <- as.data.frame(xtest)
+ytest <- as.data.frame(ytest)
+
+head(train)
+
+```
+
+```{r}
+#install.packages('rpart')
+#install.packages('caret')
+
+#Import required library
+library(caret)
+library(rpart)
+
+classifier <- rpart(booking_status ~., train)
+
+classifier.booking_status.predicted <- predict(classifier, xtest, type='class')
+
+#print(classifier.booking_status.predicted)
+#print(test$booking_status)
+ 
+# Making the Confusion Matrix
+cm = confusionMatrix(classifier.booking_status.predicted, test$booking_status)
+
+print(cm)
+```
+
+
+
+```{r}
+#install.packages("randomForest")
+library(randomForest)
+
+classifier_RF = randomForest(x = train[featue_cols],
+                             y = train[[target_col]],
+                             ntree = 500)
+
+classifier_RF.booking_status.predicted = predict(classifier_RF, newdata = test[featue_cols])
+
+confusion_mtx = confusionMatrix(classifier_RF.booking_status.predicted, test[[target_col]])
+print(confusion_mtx)
+```
+
+```{r}
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+dataset <- read.csv("Hotel Reservations.csv")
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+head(dataset)
+```
+```{r}
+dataset <- dataset[ , !(names(dataset) %in% c("Booking_ID"))]
+head(dataset)
+```
+
+```{r}
+label_encoder = function(vec){
+    levels = sort(unique(vec))
+    function(x){
+        match(x, levels)
+    }
+}
+
+
+for (column in colnames(dataset)){
+  if (typeof(dataset[[column]]) == 'character'){
+    #encoder = label_encoder(dataset[[column]])
+    #dataset[[column]] = encoder(dataset[[column]])
+    #saveRDS(encoder, paste(column, "encoder.RDS", sep = "_"))
+    dataset[[column]] = as.factor(dataset[[column]])
+  }
+}
+
+str(dataset)
+```
+```{r}
+tbl <- with(dataset, table(booking_status))
+
+barplot(tbl, legend = TRUE)
+
+```
+```{r}
+#library(corrplot)
+#corrplot(round(cor(dataset), 2), method="color", addCoef.col = 1,number.cex = 0.3, tl.cex = 0.3)
+```
+```{r}
+#install.packages('scales')
+library(scales)
+
+set.seed(123)
+
+smp_size <- floor(0.75 * nrow(dataset))
+
+train_ind <- sample(seq_len(nrow(dataset)), size = smp_size)
+
+
+#dataset[dataset["booking_status" == 1]] = 0
+#dataset[dataset["booking_status" == 2]] = 1
+
+#dataset$booking_status <- rescale(dataset$booking_status)
+
+train <- dataset[train_ind, ]
+test <- dataset[-train_ind, ]
+
+featue_cols <- colnames(dataset)[colnames(dataset) != "booking_status"]
+target_col <- "booking_status"
+
+#xtrain <- train[featue_cols]
+#ytrain <- train[[target_col]]
+
+xtest <- test[featue_cols]
+ytest <- test[[target_col]]
+
+train <- as.data.frame(train)
+xtest <- as.data.frame(xtest)
+ytest <- as.data.frame(ytest)
+
+head(train)
+
+```
+
+```{r}
+#install.packages('rpart')
+#install.packages('caret')
+
+#Import required library
+library(caret)
+library(rpart)
+
+classifier <- rpart(booking_status ~., train)
+
+classifier.booking_status.predicted <- predict(classifier, xtest, type='class')
+
+#print(classifier.booking_status.predicted)
+#print(test$booking_status)
+ 
+# Making the Confusion Matrix
+cm = confusionMatrix(classifier.booking_status.predicted, test$booking_status)
+
+print(cm)
+```
+
+
+
+```{r}
+#install.packages("randomForest")
+library(randomForest)
+
+classifier_RF = randomForest(x = train[featue_cols],
+                             y = train[[target_col]],
+                             ntree = 500)
+
+classifier_RF.booking_status.predicted = predict(classifier_RF, newdata = test[featue_cols])
+
+confusion_mtx = confusionMatrix(classifier_RF.booking_status.predicted, test[[target_col]])
+print(confusion_mtx)
+```
+
+
+```{r}
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+dataset <- read.csv("Hotel Reservations.csv")
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+```{r}
+head(dataset)
+```
+```{r}
+dataset <- dataset[ , !(names(dataset) %in% c("Booking_ID"))]
+head(dataset)
+```
+
+```{r}
+label_encoder = function(vec){
+    levels = sort(unique(vec))
+    function(x){
+        match(x, levels)
+    }
+}
+
+
+for (column in colnames(dataset)){
+  if (typeof(dataset[[column]]) == 'character'){
+    #encoder = label_encoder(dataset[[column]])
+    #dataset[[column]] = encoder(dataset[[column]])
+    #saveRDS(encoder, paste(column, "encoder.RDS", sep = "_"))
+    dataset[[column]] = as.factor(dataset[[column]])
+  }
+}
+
+str(dataset)
+```
+```{r}
+tbl <- with(dataset, table(booking_status))
+
+barplot(tbl, legend = TRUE)
+
+```
+```{r}
+#library(corrplot)
+#corrplot(round(cor(dataset), 2), method="color", addCoef.col = 1,number.cex = 0.3, tl.cex = 0.3)
+```
+```{r}
+#install.packages('scales')
+library(scales)
+
+set.seed(123)
+
+smp_size <- floor(0.75 * nrow(dataset))
+
+train_ind <- sample(seq_len(nrow(dataset)), size = smp_size)
+
+
+#dataset[dataset["booking_status" == 1]] = 0
+#dataset[dataset["booking_status" == 2]] = 1
+
+#dataset$booking_status <- rescale(dataset$booking_status)
+
+train <- dataset[train_ind, ]
+test <- dataset[-train_ind, ]
+
+featue_cols <- colnames(dataset)[colnames(dataset) != "booking_status"]
+target_col <- "booking_status"
+
+#xtrain <- train[featue_cols]
+#ytrain <- train[[target_col]]
+
+xtest <- test[featue_cols]
+ytest <- test[[target_col]]
+
+train <- as.data.frame(train)
+xtest <- as.data.frame(xtest)
+ytest <- as.data.frame(ytest)
+
+head(train)
+
+```
+
+```{r}
+#install.packages('rpart')
+#install.packages('caret')
+
+#Import required library
+library(caret)
+library(rpart)
+
+classifier <- rpart(booking_status ~., train)
+
+classifier.booking_status.predicted <- predict(classifier, xtest, type='class')
+
+#print(classifier.booking_status.predicted)
+#print(test$booking_status)
+ 
+# Making the Confusion Matrix
+cm = confusionMatrix(classifier.booking_status.predicted, test$booking_status)
+
+print(cm)
+```
+
+
+
+```{r}
+#install.packages("randomForest")
+library(randomForest)
+
+classifier_RF = randomForest(x = train[featue_cols],
+                             y = train[[target_col]],
+                             ntree = 500)
+
+classifier_RF.booking_status.predicted = predict(classifier_RF, newdata = test[featue_cols])
+
+confusion_mtx = confusionMatrix(classifier_RF.booking_status.predicted, test[[target_col]])
+print(confusion_mtx)
+```
+
+```{r}
+classifier_RF = randomForest(x = train[featue_cols],
+                             y = train[[target_col]],
+                             ntree = 400)
+
+classifier_RF.booking_status.predicted = predict(classifier_RF, newdata = test[featue_cols])
+
+confusion_mtx = confusionMatrix(classifier_RF.booking_status.predicted, test[[target_col]])
+print(confusion_mtx)
+```
