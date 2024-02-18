@@ -1,0 +1,97 @@
+#Classification Tree
+install.packages(tree)
+library(tree)
+batman <- read.csv("D:\\DC Universe\\Ucsc\\Third Year\\SCS 3201 Machine Learning\\CCPP\\Csv Files\\binary.csv")
+batman$admit=ifelse(batman$admit == 0 , "No" , "Yes")
+batman$admit<- as.factor(batman$admit)
+
+set.seed(2)
+train=sample(1:nrow(batman), 200)
+batman.test= batman[-train,]
+batman.train = batman[train,]
+tree.batman = tree(admit~gre+gpa+rank,data  =batman.train)
+tree.pred=predict(tree.batman,batman.test[,-1], type="class")
+table(tree.pred,batman.test$admit)
+
+
+set.seed(2)
+cv.batman = cv.tree(tree.batman, FUN =prune.misclass)
+plot(cv.batman$size, cv.batman$dev , type="b")
+prune.batman = prune.misclass(tree.batman, best = 3)
+tree.pred=predict(prune.batman,batman.test, type="class")
+table(tree.pred,batman.test$admit)
+plot(prune.batman);
+text(prune.batman , pretty=0)
+
+#Regression Tree
+library(MASS)
+set.seed(1)
+train=sample(1:nrow(Boston), nrow(Boston)*0.6)
+tree.boston=tree(medv~.,Boston, subset =train)
+yhat=predict(tree.boston, newdata =Boston [-train,])
+boston.test=Boston[-train, "medv"]
+mean((yhat -boston.test)^2)
+
+cv.boston=cv.tree(tree.boston)
+plot(cv.boston$size, cv.boston$dev ,main="Boston Size vs Dev", sub="Value Fluctuation",
+     xlab="Boston Size", ylab="Boston Dev", type="b")
+prune.boston=prune.tree(tree.boston, best = 4)
+yhat=predict(prune.boston, newdata= Boston [-train,])
+mean((yhat -boston.test)^2)
+
+#Random Forest and Bagging
+library(randomForest)
+set.seed(1)
+bag.boston=randomForest(medv~.,data = Boston, subset = train, mtry =13,
+                        importance=TRUE)
+yhat.bag=predict(bag.boston, newdata=Boston [-train,])
+mean((yhat.bag -boston.test)^2)
+varImpPlot(bag.boston)
+
+#Boosting
+install.packages("gbm")
+library(gbm)
+boost.boston= gbm(medv~., data = Boston[train,], distribution="gaussian",
+                  n.trees=5000, interaction.depth =4)
+yhat.boost=predict(boost.boston, newdata= Boston[-train,], n.trees =5000)
+mean((yhat.boost -boston.test)^2)
+
+boost.boston=gbm(medv~., data= Boston [train,], distribution = "gaussian",
+                 n.trees = 5000, interaction.depth = 4 , shrinkage =0.2)
+yhat.boost=predict(boost.boston, newdata= Boston[-train,], n.trees =5000)
+mean((yhat.boost -boston.test)^2)
+
+This is a small example for a how the decision tree works in a real-life decision making or analytical scenario.
+
+While there are many more characteristics to the real dataset, this is only a branch in a much larger tree, but you cannot dismiss this algorithm's simplicity. The relevance of the characteristic is obvious, and linkages may be clearly seen. This approach is most generally known as the decision tree of learning from data and above it is termed the classifying tree. Regression trees are shown in the same way, only predicting constant value such as home price. Generally speaking, CART or classification and regression trees are called decision tree algorithms.
+
+
+Cost of a split
+
+Costing and regression functions utilized. In those situations, the cost functions aim to locate most uniform branches or branches that have comparable responses in groups. We may be more confident that a test data entry will follow a specific path.
+
+Regression: sum (y — prediction) ²
+Example: -
+Let Say, the price of House properties we predict. The decision tree will now start to divide into training data by evaluating each characteristic. For the group, the meaning of the answers of the formation data inputs is regarded a forecast. The above code covers every data point and costs for all potential splits are calculated. The lowest cost division is picked again.
+
+When to stop splitting?
+Maybe you are wondering when to leave a tree? 
+Because an issue often includes a wide range of features, it leads to many splits that provide a big tree in turn. These trees can lead to overfitting and complexity. So, when do we have to know? One method is to specify a minimum amount of training inputs for each book. 
+
+For example, to reach a decision (died or survived) we can utilize a minimum of ten passengers and disregard all the leaves that take fewer than 10 people. Another technique to determine your model's maximum depth. The maximum depth is the longest route from a root to a leaf.
+
+Pruning
+Pruning can enhance the performance of a tree further. It includes the removal of the branches using low-level characteristics. Through reduced overfitting, we are lowering tree complexity and hence boosting tree prediction power.
+
+Pruning can begin at root or leaves. The easiest technique of slicing begins with the leaves and eliminates every node of the most common class in this leaf. It was also referred to as decreased pruning errors.
+
+Advantages of the Decision Tree
+•	Can handle numerical as well as categorical data. Can handle multi-output issues as well.
+•	Nonlinear parameter connections have little influence on tree performance.
+Disadvantages of the Decision Tree
+•	Unable to provide the worldwide optimum decision tree return for greedy algorithms. The training of many trees, where characteristics and samples are randomly tested using substitution, might reduce this.
+•	Decision trees may be unstable, as tiny changes in data could lead to the generation of an entirely new tree. Variance, which must be reduced by means of procedures such as bagging and boosting.
+•	Decision-tree Learners can construct overcomplex trees that do not spread the information properly. It's known as overfitting.
+
+Data science has a wide variety of classification methods, including logistical regression, support Vector machines, naive Bayes classification systems and decision-making bodies. The random forest classification is near the top of the classification hierarchy
+
