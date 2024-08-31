@@ -13,7 +13,7 @@
 3. Which store/s has good quarterly growth rate in Q3’2012?
 4. Find out holidays which have higher sales than the mean sales in non-holiday season for all stores together.
 5. Provide a monthly and semester view of sales in units and give insights.
-6. Build prediction to forecast demand.
+6. Build prediction to forecast demand
 
 
 
