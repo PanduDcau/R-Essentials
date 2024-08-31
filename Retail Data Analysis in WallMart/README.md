@@ -19,7 +19,7 @@
 
 ## 2. Installation <a name="installation"></a>
 
-- Python versions 3.*.
+- Python versions 3.9.
 - Python Libraries:
     - sklearn.
     - Pandas.
